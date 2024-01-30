@@ -1,0 +1,102 @@
+[gd_scene load_steps=19 format=3 uid="uid://cgjntlt2c03l1"]
+
+[ext_resource type="Script" path="res://game.gd" id="1_3eoxp"]
+[ext_resource type="Script" path="res://scripts/procedural_word_gen.gd" id="1_bs5m4"]
+[ext_resource type="Script" path="res://InputController.gd" id="2_oxnl8"]
+[ext_resource type="Resource" uid="uid://wciqh1xyvncc" path="res://resources/biomas/badrock_bioma.tres" id="2_ry68c"]
+[ext_resource type="Texture2D" uid="uid://cn3nh3dxpbfdg" path="res://assets/debug/ky0Hnx.png" id="3_3twar"]
+[ext_resource type="TileSet" uid="uid://dia4keumrjjfi" path="res://resources/tilesets/bioma_tileset.tres" id="3_mxjy1"]
+[ext_resource type="Resource" uid="uid://up7ljfvlsjy" path="res://resources/biomas/grass_bioma.tres" id="3_raqmw"]
+[ext_resource type="Script" path="res://scripts/PinController.gd" id="3_wjp76"]
+[ext_resource type="Texture2D" uid="uid://bo3xjop3ws5dk" path="res://assets/trgp-merge.png" id="3_ylgm1"]
+[ext_resource type="Resource" uid="uid://bc728tprx1aqu" path="res://resources/biomas/rock_bioma.tres" id="4_5tgbo"]
+[ext_resource type="Resource" uid="uid://c6f000rshn5v1" path="res://resources/biomas/high_rock_bioma.tres" id="5_pun6j"]
+[ext_resource type="Resource" uid="uid://wta8qn0qubpp" path="res://resources/biomas/water_bioma.tres" id="6_rjnqx"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6tpxy"]
+size = Vector2(35.25, 55)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c07gm"]
+atlas = ExtResource("3_ylgm1")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_adll1"]
+atlas = ExtResource("3_ylgm1")
+region = Rect2(0, 17, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_koo33"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c07gm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_adll1")
+}],
+"loop": true,
+"name": &"new_animation",
+"speed": 5.0
+}]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_7cxrh"]
+noise_type = 2
+frequency = 0.1995
+fractal_octaves = 2
+fractal_lacunarity = 1.0
+fractal_gain = 5.0
+fractal_weighted_strength = 0.07
+cellular_distance_function = 3
+cellular_jitter = 5.0
+metadata/_preview_in_3d_space_ = true
+
+[sub_resource type="NoiseTexture3D" id="NoiseTexture3D_vd8sj"]
+seamless_blend_skirt = 0.05
+noise = SubResource("FastNoiseLite_7cxrh")
+
+[node name="GameController" type="Node2D"]
+script = ExtResource("1_3eoxp")
+depth = 64
+biomas = Array[Object]([ExtResource("2_ry68c"), ExtResource("3_raqmw"), ExtResource("4_5tgbo"), ExtResource("5_pun6j")])
+selected_object = ExtResource("6_rjnqx")
+
+[node name="InputController" type="Node2D" parent="."]
+process_mode = 4
+script = ExtResource("2_oxnl8")
+
+[node name="CharacterBody2D" type="CharacterBody2D" parent="."]
+script = ExtResource("3_wjp76")
+
+[node name="Sprite2D" type="Sprite2D" parent="CharacterBody2D"]
+position = Vector2(-32, -32)
+scale = Vector2(1.9375, 1.9375)
+texture = ExtResource("3_3twar")
+region_enabled = true
+region_rect = Rect2(352, 128, 32, 32)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CharacterBody2D"]
+position = Vector2(-31, -34)
+shape = SubResource("RectangleShape2D_6tpxy")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="CharacterBody2D/CollisionShape2D"]
+y_sort_enabled = true
+position = Vector2(0, -17.5)
+scale = Vector2(9, 9)
+sprite_frames = SubResource("SpriteFrames_koo33")
+animation = &"new_animation"
+frame_progress = 0.818236
+metadata/_edit_lock_ = true
+
+[node name="Camera2D" type="Camera2D" parent="CharacterBody2D"]
+zoom = Vector2(0.5, 0.5)
+
+[node name="procedural_word_controller" type="Node2D" parent="."]
+script = ExtResource("1_bs5m4")
+noise_map = SubResource("NoiseTexture3D_vd8sj")
+
+[node name="TileMap" type="TileMap" parent="procedural_word_controller"]
+tile_set = ExtResource("3_mxjy1")
+format = 2
+
+[connection signal="change_layer" from="." to="procedural_word_controller" method="_on_game_controller_change_layer"]
+[connection signal="mouse_click" from="InputController" to="." method="_on_input_controller_mouse_click"]
+[connection signal="onGenerationCompleted" from="procedural_word_controller" to="." method="_on_procedural_word_on_generation_completed"]

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="Bioma" load_steps=2 format=3 uid="uid://bc728tprx1aqu"]
+
+[ext_resource type="Script" path="res://scripts/bioma.gd" id="1_bkei2"]
+
+[resource]
+script = ExtResource("1_bkei2")
+bioma_name = "rock"
+range_start = 11
+range_end = 45
+terrain_set = 0
+terrain = 2
+tile_map_offset = 0.5
+bearer = true

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="Bioma" load_steps=2 format=3 uid="uid://wciqh1xyvncc"]
+
+[ext_resource type="Script" path="res://scripts/bioma.gd" id="1_wgiiv"]
+
+[resource]
+script = ExtResource("1_wgiiv")
+bioma_name = "badrock"
+range_start = 0
+range_end = 0
+terrain_set = 0
+terrain = 3
+tile_map_offset = -1.0
+bearer = true
+plane = 0

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="Bioma" load_steps=2 format=3 uid="uid://wta8qn0qubpp"]
+
+[ext_resource type="Script" path="res://scripts/bioma.gd" id="1_6xnce"]
+
+[resource]
+script = ExtResource("1_6xnce")
+bioma_name = "water"
+range_start = 0
+range_end = 64
+terrain_set = 0
+terrain = 0
+tile_map_offset = 0.0
+bearer = true
+plane = 1
