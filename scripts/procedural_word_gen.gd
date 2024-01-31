@@ -15,17 +15,8 @@ const planes = [0,1]
 func half_range(dim: int):
 	return range(-dim/2.0, dim/2.0)
 	
-class Layer:
-	var name: String
-	var depth: int
-	var map_depth: int
-	func _init(_depth: int, _plane: int):
-		self.name = "{0}_{1}".format([_depth, _plane])
-		self.depth = _depth
-		self.map_depth = len(planes) * _depth + _plane
-	
 func create_layer(depth: int, plane: int):
-	var layer = Layer.new(depth,plane)
+	var layer = Layer.new(depth,plane,len(planes))
 	tile_map.add_layer(layer.map_depth)
 	tile_map.set_layer_y_sort_enabled(layer.map_depth, true)
 	tile_map.set_layer_z_index(layer.map_depth,layer.map_depth)
@@ -105,12 +96,11 @@ func paint_terrains():
 		for b_name in tiles.keys(): 
 			var elem = tiles[b_name]
 			tile_map.set_cells_terrain_connect(layer.map_depth, elem.coords, elem.bioma.terrain_set, elem.bioma.terrain)
-				
+
 func initialize(_biomas: Array[Bioma]):
 	biomas =_biomas
 	tile_map.y_sort_enabled = true
-	await generate()
-	await get_tree().create_timer(1.0).timeout
+	generate()
 	emit_signal("onGenerationCompleted")
 	
 func _init():
@@ -135,7 +125,8 @@ func _on_game_controller_change_layer(current_layer: int):
 				
 
 
-func place_object(coord: Vector3i, object: Bioma):
+func place_object(coord: Vector3i, object: GrowableTerrain):
 	print('place {0}'.format([coord]))
-	var layer = Layer.new(coord.z, object.plane)
-	tile_map.set_cells_terrain_connect(layer.map_depth,[Vector2i(coord.x,coord.y)], object.terrain_set,object.terrain)
+	var layer = Layer.new(coord.z, object.plane, len(planes))
+	var pos = Vector2i(coord.x,coord.y)
+	object.grow(tile_map, layer,pos)

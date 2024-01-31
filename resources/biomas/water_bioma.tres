@@ -1,9 +1,11 @@
-[gd_resource type="Resource" script_class="Bioma" load_steps=2 format=3 uid="uid://wta8qn0qubpp"]
+[gd_resource type="Resource" script_class="GrowableTerrain" load_steps=2 format=3 uid="uid://wta8qn0qubpp"]
 
-[ext_resource type="Script" path="res://scripts/bioma.gd" id="1_6xnce"]
+[ext_resource type="Script" path="res://scripts/GrowableTerrain.gd" id="1_f131k"]
 
 [resource]
-script = ExtResource("1_6xnce")
+script = ExtResource("1_f131k")
+grove_ratio = 1.0
+qnt = 0
 bioma_name = "water"
 range_start = 0
 range_end = 64
