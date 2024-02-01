@@ -60,7 +60,6 @@ biomas = Array[Resource("res://scripts/bioma.gd")]([ExtResource("2_ry68c"), ExtR
 selected_object = ExtResource("6_rjnqx")
 
 [node name="InputController" type="Node2D" parent="."]
-process_mode = 4
 script = ExtResource("2_oxnl8")
 
 [node name="CharacterBody2D" type="CharacterBody2D" parent="."]

@@ -15,3 +15,9 @@ func _init(_depth: int, _plane: int, _planes_len: int):
 func set_depth(_depth: int):
 	self.depth = _depth
 	self.map_depth = self.planes_len * _depth + self.plane
+	
+func getBelow():
+	return map_depth - planes_len
+
+func getAbove():
+	return map_depth + planes_len

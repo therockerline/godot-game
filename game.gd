@@ -26,7 +26,6 @@ func _ready():
 
 func _on_procedural_word_on_generation_completed():
 	current_lvl = depth / 2
-	input_controller.process_mode = Node.PROCESS_MODE_ALWAYS
 
 func _on_input_controller_mouse_click(coord):
 	print(coord)

@@ -1,34 +1,74 @@
 class_name GrowableTerrain
 extends Bioma
 
-@export var grove_ratio: float
-var qnt: int
+@export var growth_speed: float = 0.1
+@export var drop_speed: float = 0.1
+var qnt: int = 3
+var tile_map: TileMap
+var visited: Array[Vector3i]
+
+func can_place(depth: int, position: Vector2i):
+	var data = tile_map.get_cell_tile_data(depth, position)
+	if data:
+		var bioma: Bioma = data.get_custom_data('bioma')
+		return bioma.bearer and qnt > 0
+	elif depth < 0:
+		return false
+	return false
+	
+func place(depth: int, position: Vector2i, isDrop: bool = false):
+	if qnt > 0:
+		tile_map.set_cells_terrain_connect(depth,[position], terrain_set,terrain)
+		if not isDrop:
+			qnt -= 1
+
+func drop(layer: Layer, position: Vector2i):
+	print('drop down {0}'.format([layer.depth]))
+	place(layer.map_depth,position, true)
+	await tile_map.get_tree().create_timer(drop_speed).timeout
+	#rimuovo la cella precedente
+	tile_map.set_cell(layer.map_depth,position, -1)
+	#scendo di quota
+	layer.set_depth(layer.depth-1)	
+	#provo a diffondermi
+	grow(tile_map, layer, position)
+	
+func try_join(depth: int, position: Vector2i):
+	var data = tile_map.get_cell_tile_data(depth, position)
+	if data:
+		var bioma: Bioma = data.get_custom_data('bioma')
+		if bioma:
+			#verifico se l'oggetto è  lo stesso
+			if bioma.bioma_name == bioma_name:
+				#in questo caso mi prendo la sua quantità
+				qnt += bioma.qnt
+				bioma.qnt = 1
+	
 # Called when the node enters the scene tree for the first time.
-func grow(tile_map: TileMap, layer: Layer, position: Vector2i):
-	print('place in {0}'.format([position]))
-	if layer.depth > 0:
-		var data = tile_map.get_cell_tile_data(layer.depth - 1, position)
-		if data:
-			var bioma: Bioma = data.get_custom_data('bioma')
-			print('data {0}'.format([bioma]))
-			if bioma.bearer:
-				tile_map.set_cells_terrain_connect(layer.map_depth,[position], self.terrain_set,self.terrain)
-				qnt -= 1
-				var surrounding_cells: Array[Vector2i] = tile_map.get_surrounding_cells(position)
-				print(surrounding_cells)
-				var best_tile: Vector2i
-				for cell in surrounding_cells:
-					var cell_data = tile_map.get_cell_tile_data(layer.map_depth, cell)
-					print('surrounding {0} {1}'.format([cell, cell_data]))
-					if cell_data:
-						var cell_bioma: Bioma = cell_data.get_custom_data('bioma')
-						print('cell_bioma {0}'.format([cell_bioma]))
+func grow(tile_map: TileMap, noise: Noise,  layer: Layer, position: Vector2i):	
+	print('place in {0} qnt: {1}'.format([position, qnt]))
+	visited.append(Vector3i(position.x, position.y, layer.map_depth))
+	if not self.tile_map:
+		self.tile_map = tile_map
+	if layer.depth >= 0:
+		#questi sono i dati del tile inferiore
+		if can_place(layer.getBelow(), position):
+			#se il bioma inferiore è portante allora a questa altezza (layer.map_depth) posso generare il mio elemento
+			place(layer.map_depth,position)
+
+			var surrounding_cells: Array[Vector2i] = tile_map.get_surrounding_cells(position)
+			await tile_map.get_tree().create_timer(growth_speed).timeout
+			randomize()
+			surrounding_cells.shuffle()
+			for cell in surrounding_cells:
+				var cell3 = Vector3i(cell.x,cell.y, layer.map_depth)				
+				if can_place(layer.getBelow(), cell):
+					if not visited.has(cell3):
+						#provo ad unire con la cella adiacente se dello stesso tipo
+						try_join(layer.map_depth, cell)			
+						#poi diffondo
+						self.grow(tile_map, layer, cell)
 		else:
-			tile_map.set_cells_terrain_connect(layer.map_depth,[position], self.terrain_set,self.terrain)
-			await tile_map.get_tree().create_timer(0.1).timeout
-			tile_map.set_cells_terrain_connect(layer.map_depth,[position], -1,-1)
-			layer.set_depth(layer.depth-1)	
-			print('drop down {0}'.format([layer.depth]))	
-			self.grow(tile_map, layer,position)
+			drop(layer, position)			
 
 
