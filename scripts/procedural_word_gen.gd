@@ -130,4 +130,4 @@ func place_object(coord: Vector3i, object: GrowableTerrain):
 	var layer = Layer.new(coord.z, object.plane, len(planes))
 	var pos = Vector2i(coord.x,coord.y)
 	object.qnt = 15
-	object.grow(tile_map, layer,pos)
+	object.grow(tile_map, noise, layer,pos)

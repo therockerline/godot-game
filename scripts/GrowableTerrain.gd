@@ -5,6 +5,7 @@ extends Bioma
 @export var drop_speed: float = 0.1
 var qnt: int = 3
 var tile_map: TileMap
+var noise: Noise
 var visited: Array[Vector3i]
 
 func can_place(depth: int, position: Vector2i):
@@ -31,7 +32,7 @@ func drop(layer: Layer, position: Vector2i):
 	#scendo di quota
 	layer.set_depth(layer.depth-1)	
 	#provo a diffondermi
-	grow(tile_map, layer, position)
+	grow(tile_map, noise, layer, position)
 	
 func try_join(depth: int, position: Vector2i):
 	var data = tile_map.get_cell_tile_data(depth, position)
@@ -46,10 +47,13 @@ func try_join(depth: int, position: Vector2i):
 	
 # Called when the node enters the scene tree for the first time.
 func grow(tile_map: TileMap, noise: Noise,  layer: Layer, position: Vector2i):	
-	print('place in {0} qnt: {1}'.format([position, qnt]))
-	visited.append(Vector3i(position.x, position.y, layer.map_depth))
+	var coord: Vector3i = Vector3i(position.x, position.y, layer.map_depth)
+	print('place in {0} qnt: {1}, noise: {2}'.format([position, qnt, noise.get_noise_3dv(coord)]))
+	visited.append(coord)
 	if not self.tile_map:
 		self.tile_map = tile_map
+	if not self.noise:
+		self.noise = noise
 	if layer.depth >= 0:
 		#questi sono i dati del tile inferiore
 		if can_place(layer.getBelow(), position):
@@ -67,7 +71,7 @@ func grow(tile_map: TileMap, noise: Noise,  layer: Layer, position: Vector2i):
 						#provo ad unire con la cella adiacente se dello stesso tipo
 						try_join(layer.map_depth, cell)			
 						#poi diffondo
-						self.grow(tile_map, layer, cell)
+						self.grow(tile_map, noise, layer, cell)
 		else:
 			drop(layer, position)			
 
