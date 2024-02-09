@@ -10,11 +10,9 @@ var visited: Array[Vector3i]
 
 func can_place(depth: int, position: Vector2i):
 	var data = tile_map.get_cell_tile_data(depth, position)
-	if data:
+	if data or depth == 0:
 		var bioma: Bioma = data.get_custom_data('bioma')
 		return bioma.bearer and qnt > 0
-	elif depth < 0:
-		return false
 	return false
 	
 func place(depth: int, position: Vector2i, isDrop: bool = false):
@@ -42,14 +40,15 @@ func try_join(depth: int, position: Vector2i):
 			#verifico se l'oggetto è  lo stesso
 			if bioma.bioma_name == bioma_name:
 				#in questo caso mi prendo la sua quantità
-				qnt += bioma.qnt
-				bioma.qnt = 1
+				print('{0} {1}'.format([qnt, bioma.qnt]))
+				#qnt += bioma.qnt
+				#bioma.qnt = 1
 	
 # Called when the node enters the scene tree for the first time.
 func grow(tile_map: TileMap, noise: Noise,  layer: Layer, position: Vector2i):	
 	var coord: Vector3i = Vector3i(position.x, position.y, layer.map_depth)
 	print('place in {0} qnt: {1}, noise: {2}'.format([position, qnt, noise.get_noise_3dv(coord)]))
-	visited.append(coord)
+	
 	if not self.tile_map:
 		self.tile_map = tile_map
 	if not self.noise:
@@ -59,19 +58,24 @@ func grow(tile_map: TileMap, noise: Noise,  layer: Layer, position: Vector2i):
 		if can_place(layer.getBelow(), position):
 			#se il bioma inferiore è portante allora a questa altezza (layer.map_depth) posso generare il mio elemento
 			place(layer.map_depth,position)
-
+			#visited.append(coord)
 			var surrounding_cells: Array[Vector2i] = tile_map.get_surrounding_cells(position)
 			await tile_map.get_tree().create_timer(growth_speed).timeout
-			randomize()
-			surrounding_cells.shuffle()
+			var best_cell = null
+			var min = INF
 			for cell in surrounding_cells:
-				var cell3 = Vector3i(cell.x,cell.y, layer.map_depth)				
-				if can_place(layer.getBelow(), cell):
-					if not visited.has(cell3):
-						#provo ad unire con la cella adiacente se dello stesso tipo
-						try_join(layer.map_depth, cell)			
-						#poi diffondo
-						self.grow(tile_map, noise, layer, cell)
+				var cell3 = Vector3i(cell.x,cell.y, layer.map_depth)
+				#if 	not visited.has(cell3):		
+				var v = noise.get_noise_3dv(cell3)
+				if v < min:
+					min = v
+					best_cell = cell
+				print('check {0} {1}'.format([cell, v]))
+			if best_cell:
+				#provo ad unire con la cella adiacente se dello stesso tipo
+				try_join(layer.map_depth, best_cell)			
+				#poi diffondo
+				self.grow(tile_map, noise, layer, best_cell)
 		else:
 			drop(layer, position)			
 

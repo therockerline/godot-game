@@ -39,8 +39,9 @@ animations = [{
 }]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_7cxrh"]
-noise_type = 2
-frequency = 0.1995
+noise_type = 0
+frequency = 0.0247
+offset = Vector3(107.14, -35.09, 0)
 fractal_octaves = 2
 fractal_lacunarity = 1.0
 fractal_gain = 5.0
